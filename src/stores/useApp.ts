@@ -10,12 +10,15 @@ interface AppState {
   folderStack: FolderInfo[];
   searchQuery: string;
   organizationId: string | null;
+  selectedResources: Set<string>;
   setSelectedIntegration: (id: string | null) => void;
   navigateToFolder: (folderId: string, folderName: string) => void;
   navigateBack: () => void;
   navigateToRoot: () => void;
   setSearchQuery: (query: string) => void;
   setOrganizationId: (id: string | null) => void;
+  toggleResourceSelection: (resourceId: string) => void;
+  clearSelectedResources: () => void;
   reset: () => void;
 }
 
@@ -24,6 +27,7 @@ export const useApp = create<AppState>((set) => ({
   folderStack: [],
   searchQuery: "",
   organizationId: null,
+  selectedResources: new Set<string>(),
   setSelectedIntegration: (id) => set({ selectedIntegration: id }),
   navigateToFolder: (folderId, folderName) =>
     set((state) => ({
@@ -36,11 +40,23 @@ export const useApp = create<AppState>((set) => ({
   navigateToRoot: () => set({ folderStack: [] }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setOrganizationId: (id) => set({ organizationId: id }),
+  toggleResourceSelection: (resourceId) =>
+    set((state) => {
+      const newSelectedResources = new Set(state.selectedResources);
+      if (newSelectedResources.has(resourceId)) {
+        newSelectedResources.delete(resourceId);
+      } else {
+        newSelectedResources.add(resourceId);
+      }
+      return { selectedResources: newSelectedResources };
+    }),
+  clearSelectedResources: () => set({ selectedResources: new Set<string>() }),
   reset: () =>
     set({
       selectedIntegration: null,
       folderStack: [],
       searchQuery: "",
       organizationId: null,
+      selectedResources: new Set<string>(),
     }),
 }));

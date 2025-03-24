@@ -2,6 +2,7 @@
 
 import { Resource } from "@/shared/resource";
 import { File, Folder } from "lucide-react";
+import { useApp } from "@/stores/useApp";
 
 interface FileListProps {
   resources: Resource[];
@@ -14,7 +15,8 @@ export function FileList({
   isLoading,
   onResourceClick,
 }: FileListProps) {
-  console.log(resources);
+  const { selectedResources, toggleResourceSelection } = useApp();
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -37,20 +39,36 @@ export function FileList({
         const name =
           resource.inode_path.path.split("/").pop() || resource.inode_path.path;
         const isFolder = resource.inode_type === "directory";
+        const isSelected = selectedResources.has(resource.resource_id);
 
         return (
           <div
             key={resource.resource_id}
-            className={`flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer`}
-            onClick={() => onResourceClick(resource)}
+            className={`flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-gray-300 ${
+              isSelected ? "bg-blue-50 border-blue-200" : ""
+            }`}
           >
             <div className="flex items-center space-x-3 min-w-0">
-              {isFolder ? (
-                <Folder className="h-5 w-5 text-gray-500" />
-              ) : (
-                <File className="h-5 w-5 text-gray-500" />
-              )}
-              <p className="text-sm text-gray-900 truncate">{name}</p>
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  toggleResourceSelection(resource.resource_id);
+                }}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <div
+                className="flex items-center space-x-2 cursor-pointer"
+                onClick={() => onResourceClick(resource)}
+              >
+                {isFolder ? (
+                  <Folder className="h-5 w-5 text-gray-500" />
+                ) : (
+                  <File className="h-5 w-5 text-gray-500" />
+                )}
+                <p className="text-sm text-gray-900 truncate">{name}</p>
+              </div>
             </div>
           </div>
         );
