@@ -1,103 +1,138 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useConnections } from "@/services/hooks/useConnections";
+import { useAuth } from "@/stores/useAuth";
+import { useLogin } from "@/services/hooks/useLogin";
+import { useOrganizationId } from "@/services/hooks/useOrganizationId";
+import { FilePicker } from "@/components/file-picker";
+
+const EMAIL = process.env.NEXT_PUBLIC_STACK_AI_EMAIL as string;
+const PASSWORD = process.env.NEXT_PUBLIC_STACK_AI_PASSWORD as string;
+const MAX_AUTH_ATTEMPTS = 3;
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { isAuthenticated, hydrated, setToken } = useAuth();
+  const { login, error: loginError } = useLogin();
+  const [authAttempts, setAuthAttempts] = useState(0);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [shouldFetchConnections, setShouldFetchConnections] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const { data: connections, error: connectionsError } = useConnections(
+    shouldFetchConnections
+  );
+  const { error: organizationError } = useOrganizationId();
+
+  // Handle authentication
+  useEffect(() => {
+    const authenticate = async () => {
+      if (hydrated && !isAuthenticated && authAttempts < MAX_AUTH_ATTEMPTS) {
+        try {
+          setIsAuthenticating(true);
+          console.log("Attempting login...");
+          const token = await login({ email: EMAIL, password: PASSWORD });
+          setToken(token);
+          setShouldFetchConnections(true);
+        } catch (error) {
+          console.error("Authentication error:", error);
+          setAuthAttempts((prev) => prev + 1);
+        } finally {
+          setIsAuthenticating(false);
+          setIsInitialLoad(false);
+        }
+      } else if (hydrated && isAuthenticated) {
+        // If already authenticated, ensure we fetch connections
+        setShouldFetchConnections(true);
+      }
+    };
+
+    authenticate();
+  }, [hydrated, isAuthenticated, login, setToken, authAttempts]);
+
+  // Reset state when component unmounts
+  useEffect(() => {
+    return () => {
+      setShouldFetchConnections(false);
+      setIsInitialLoad(true);
+    };
+  }, []);
+
+  // Show loading state while store is hydrating
+  if (!hydrated) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-2">Loading...</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    );
+  }
+
+  // Show authenticating state while logging in
+  if (!isAuthenticated || isAuthenticating) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-2">
+            {isInitialLoad
+              ? "Loading..."
+              : isAuthenticating
+              ? "Authenticating..."
+              : "Please wait..."}
+          </p>
+          {loginError && (
+            <p className="text-red-600 text-sm mb-2">{loginError.message}</p>
+          )}
+          {authAttempts >= MAX_AUTH_ATTEMPTS && (
+            <div className="mt-4">
+              <p className="text-red-600 text-sm mb-2">
+                Maximum authentication attempts reached. Please check your
+                credentials and try again.
+              </p>
+              <button
+                onClick={() => {
+                  setAuthAttempts(0);
+                  setIsInitialLoad(true);
+                  setShouldFetchConnections(false);
+                  window.location.reload();
+                }}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (connectionsError || organizationError) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">
+            {connectionsError instanceof Error
+              ? connectionsError.message
+              : organizationError instanceof Error
+              ? organizationError.message
+              : "Failed to load resources"}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm text-blue-600 hover:text-blue-700"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <main className="min-h-screen">
+      <FilePicker connections={connections || []} />
+    </main>
   );
 }
