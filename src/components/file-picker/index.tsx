@@ -43,13 +43,6 @@ export function FilePicker({ connections }: FilePickerProps) {
     }
   };
 
-  const filteredResources =
-    resources?.filter((resource) => {
-      const name =
-        resource.inode_path.path.split("/").pop() || resource.inode_path.path;
-      return name.toLowerCase().includes(searchQuery.toLowerCase());
-    }) || [];
-
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -114,14 +107,12 @@ export function FilePicker({ connections }: FilePickerProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         <Header
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
           folderStack={folderStack}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
         <main className="flex-1 overflow-auto p-4">
           <FileList
-            resources={filteredResources}
+            resources={resources || []}
             isLoading={isLoading}
             onResourceClick={handleResourceClick}
             currentPath={
@@ -129,6 +120,8 @@ export function FilePicker({ connections }: FilePickerProps) {
                 ? folderStack[folderStack.length - 1].path
                 : "/"
             }
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
         </main>
       </div>

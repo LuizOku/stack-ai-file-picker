@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Home, Search, Database } from "lucide-react";
+import { Menu, Home, Database } from "lucide-react";
 import { useApp } from "@/stores/useApp";
 import { useCreateKnowledgeBase } from "@/services/hooks/useCreateKnowledgeBase";
 import { useSyncKnowledgeBase } from "@/services/hooks/useSyncKnowledgeBase";
@@ -14,18 +14,11 @@ interface FolderInfo {
 }
 
 interface HeaderProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
   folderStack: FolderInfo[];
   onMenuClick: () => void;
 }
 
-export function Header({
-  searchQuery,
-  onSearchChange,
-  folderStack,
-  onMenuClick,
-}: HeaderProps) {
+export function Header({ folderStack, onMenuClick }: HeaderProps) {
   const {
     navigateBack,
     navigateToRoot,
@@ -79,62 +72,55 @@ export function Header({
   };
 
   return (
-    <div className="border-b border-gray-200 bg-white">
-      <div className="flex flex-col sm:flex-row h-auto sm:h-16 items-start sm:items-center px-4 py-2 sm:py-0">
-        <div className="flex items-center w-full sm:w-auto mb-2 sm:mb-0">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b space-y-2 sm:space-y-0">
+      <div className="flex items-center space-x-4 w-full sm:w-auto overflow-x-auto">
+        <button
+          onClick={onMenuClick}
+          className="p-2 hover:bg-gray-100 rounded-lg shrink-0"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
+        <div className="flex items-center space-x-2 overflow-x-auto min-w-0 scrollbar-hide">
           <button
-            id="menu-button"
-            onClick={onMenuClick}
-            className="mr-4 text-gray-500 hover:text-gray-700 md:hidden"
+            onClick={navigateToRoot}
+            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer shrink-0"
           >
-            <Menu className="h-6 w-6" />
+            <Home className="h-5 w-5" />
           </button>
-          <div className="flex items-center space-x-2 min-w-0 flex-wrap">
-            <button
-              onClick={navigateToRoot}
-              className="text-sm text-gray-500 hover:text-gray-700 flex items-center cursor-pointer"
-              title="Go to root folder"
-            >
-              <Home className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Home</span>
-            </button>
-            {folderStack.map((folder, index) => (
-              <div key={folder.id} className="flex items-center">
-                <span className="text-gray-500 mx-2">/</span>
-                <button
-                  onClick={() => handleFolderClick(index)}
-                  className={`text-sm cursor-pointer ${
-                    index === folderStack.length - 1
-                      ? "text-gray-900"
-                      : "text-gray-700 hover:text-gray-900"
-                  }`}
-                >
-                  {folder.name}
-                </button>
-              </div>
-            ))}
-          </div>
+
+          {folderStack.map((folder, index) => (
+            <div key={folder.id} className="flex items-center shrink-0">
+              <span className="text-gray-500 mx-2">/</span>
+              <button
+                onClick={() => handleFolderClick(index)}
+                className={`hover:underline cursor-pointer truncate max-w-[150px] ${
+                  index === folderStack.length - 1
+                    ? "text-gray-700 font-medium"
+                    : "text-gray-500"
+                }`}
+                title={folder.name}
+              >
+                {folder.name}
+              </button>
+            </div>
+          ))}
         </div>
-        <div className="w-full sm:w-auto sm:ml-auto flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search files..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full sm:w-64 rounded-md border border-gray-300 pl-10 pr-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-          <Button
-            onClick={handleIndex}
-            disabled={selectedResources.size === 0 || isIndexing}
-            className="flex items-center gap-2 bg-blue-500 text-white cursor-pointer"
-          >
+      </div>
+
+      <div className="flex items-center space-x-4 w-full sm:w-auto justify-end">
+        <Button
+          onClick={handleIndex}
+          disabled={selectedResources.size === 0 || isIndexing}
+          className="flex items-center space-x-2 w-full sm:w-auto justify-center bg-blue-500 text-white cursor-pointer"
+        >
+          {isIndexing ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+          ) : (
             <Database className="h-4 w-4" />
-            <span>Index Selected</span>
-          </Button>
-        </div>
+          )}
+          <span>Index Selected</span>
+        </Button>
       </div>
     </div>
   );
