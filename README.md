@@ -2,6 +2,10 @@
 
 A modern, responsive file picker component built with Next.js and TypeScript. This application allows users to browse, select, and index files from various connected sources into knowledge bases.
 
+## Live Demo
+
+🚀 **[Check out the live demo](https://stack-ai-file-picker-romf.vercel.app/)**
+
 ## Features
 
 - 🗂️ **File System Navigation**
