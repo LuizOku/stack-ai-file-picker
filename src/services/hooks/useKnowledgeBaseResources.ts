@@ -16,8 +16,11 @@ export function useKnowledgeBaseResources(
   const token = useAuth.getState().token;
   const params = new URLSearchParams();
 
-  // Always include resource_path
-  params.set("resource_path", resourcePath);
+  // Encode the path for URL safety
+  params.set(
+    "resource_path",
+    resourcePath === "/" ? resourcePath : encodeURIComponent(resourcePath)
+  );
 
   return useSWR<KnowledgeBaseResourcesResponse>(
     knowledgeBaseId
