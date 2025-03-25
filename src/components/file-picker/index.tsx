@@ -64,25 +64,21 @@ export function FilePicker({ connections }: FilePickerProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isSidebarOpen]);
 
-  if (error) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-2">
-            {error instanceof Error
-              ? error.message
-              : "Failed to load resources"}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-sm text-blue-600 hover:text-blue-700"
-          >
-            Try again
-          </button>
-        </div>
+  const errorContent = error ? (
+    <div className="h-full flex items-center justify-center">
+      <div className="text-center">
+        <p className="text-red-600 mb-2">
+          {error instanceof Error ? error.message : "Failed to load resources"}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="text-sm text-blue-600 hover:text-blue-700"
+        >
+          Try again
+        </button>
       </div>
-    );
-  }
+    </div>
+  ) : null;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -111,18 +107,22 @@ export function FilePicker({ connections }: FilePickerProps) {
           onMenuClick={() => setIsSidebarOpen(true)}
         />
         <main className="flex-1 overflow-auto p-4">
-          <FileList
-            resources={resources || []}
-            isLoading={isLoading}
-            onResourceClick={handleResourceClick}
-            currentPath={
-              folderStack.length > 0
-                ? folderStack[folderStack.length - 1].path
-                : "/"
-            }
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
+          {error ? (
+            errorContent
+          ) : (
+            <FileList
+              resources={resources || []}
+              isLoading={isLoading}
+              onResourceClick={handleResourceClick}
+              currentPath={
+                folderStack.length > 0
+                  ? folderStack[folderStack.length - 1].path
+                  : "/"
+              }
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
+          )}
         </main>
       </div>
     </div>
