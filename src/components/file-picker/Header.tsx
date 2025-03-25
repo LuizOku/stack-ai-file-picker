@@ -52,7 +52,7 @@ export function Header({ folderStack, onMenuClick }: HeaderProps) {
       const kb = await createKnowledgeBase({
         connection_id: selectedIntegration,
         connection_source_ids: Array.from(selectedResources),
-        name: "Luiz's Knowledge Base",
+        name: "New Knowledge Base",
         description: "Created from file picker",
       });
 

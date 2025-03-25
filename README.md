@@ -1,36 +1,154 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stack AI File Picker
+
+A modern, responsive file picker component built with Next.js and TypeScript. This application allows users to browse, select, and index files from various connected sources into knowledge bases.
+
+## Features
+
+- 🗂️ **File System Navigation**
+  - Browse through directories with an intuitive breadcrumb navigation
+  - Quick return to root directory
+  - Responsive sidebar for connection selection
+
+- 🔍 **Search and Sort**
+  - Real-time file and folder search
+  - Sort by name or modification date
+  - Directory-first sorting
+
+- 🔄 **Knowledge Base Integration**
+  - Create knowledge bases from selected files
+  - Index multiple files simultaneously
+  - Remove files from knowledge base (unindex)
+  - Real-time indexing status updates
+  - Automatic sync after indexing
+
+- 💫 **Modern UI/UX**
+  - Responsive design for mobile and desktop
+  - Loading states and animations
+  - Clean and intuitive interface
+  - Geist font integration
+
+## Tech Stack
+
+- **Framework**: Next.js 15.2
+- **Language**: TypeScript
+- **State Management**: Zustand
+- **Data Fetching**: SWR
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Authentication**: Token-based with automatic refresh
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18.0 or later
+- npm, yarn, or pnpm
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# API Configuration
+NEXT_PUBLIC_STACK_AI_API_URL=https://api.stack-ai.com      # Stack AI API base URL
+NEXT_PUBLIC_SUPABASE_AUTH_URL=https://sb.stack-ai.com      # Supabase Auth URL
+
+# Authentication
+NEXT_PUBLIC_ANON_KEY=your_supabase_anon_key               # Supabase Anonymous Key
+NEXT_PUBLIC_STACK_AI_EMAIL=your_email                     # Your Stack AI account email
+NEXT_PUBLIC_STACK_AI_PASSWORD=your_password               # Your Stack AI account password
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+```bash
+git clone https://github.com/LuizOku/stack-ai-file-picker.git
+cd stack-ai-file-picker
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies:
+```bash
+yarn install
+```
 
-## Learn More
+3. Run the development server:
+```bash
+yarn dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                    # Next.js app directory
+├── components/            
+│   ├── button/            # Reusable button component
+│   ├── file-picker/       # Main file picker components
+│   └── search-input/      # Search input component
+├── services/
+│   ├── api.ts            # API configuration and fetcher
+│   └── hooks/            # Custom hooks for data fetching
+├── shared/
+│   └── resource.ts       # Shared types and interfaces
+└── stores/
+    ├── useApp.ts         # Application state management
+    └── useAuth.ts        # Authentication state management
+```
 
-## Deploy on Vercel
+## Key Components
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### FilePicker
+The main component that orchestrates the file browsing experience. It includes:
+- Connection selection via sidebar
+- File/folder navigation
+- Resource selection and indexing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### FileList
+Displays the list of resources with features like:
+- Sorting capabilities
+- Search filtering
+- Selection management
+- Indexing status display
+
+### Header
+Provides navigation and actions including:
+- Breadcrumb navigation
+- Root directory access
+- Indexing selected resources
+
+## State Management
+
+The application uses Zustand for state management with two main stores:
+
+- **useApp**: Manages application state including:
+  - Selected resources
+  - Current integration
+  - Navigation stack
+  - Knowledge base ID
+
+- **useAuth**: Handles authentication state:
+  - Token management
+  - Authentication status
+  - Auto-logout on token expiration
+
+## API Integration
+
+The application integrates with a REST API using SWR for data fetching. Key features include:
+- Automatic token refresh
+- Error handling for 401 responses
+- Optimistic updates for better UX
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
