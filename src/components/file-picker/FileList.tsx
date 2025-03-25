@@ -1,21 +1,34 @@
 "use client";
 
 import { Resource } from "@/shared/resource";
-import { File, Folder } from "lucide-react";
+import { File, Folder, Check } from "lucide-react";
 import { useApp } from "@/stores/useApp";
+import { useKnowledgeBaseResources } from "@/services/hooks/useKnowledgeBaseResources";
 
 interface FileListProps {
   resources: Resource[];
   isLoading: boolean;
   onResourceClick: (resource: Resource) => void;
+  currentPath: string;
 }
 
 export function FileList({
   resources,
   isLoading,
   onResourceClick,
+  currentPath,
 }: FileListProps) {
-  const { selectedResources, toggleResourceSelection } = useApp();
+  const { selectedResources, toggleResourceSelection, currentKnowledgeBaseId } =
+    useApp();
+  const { data: kbResources } = useKnowledgeBaseResources(
+    currentKnowledgeBaseId ?? undefined,
+    currentPath
+  );
+
+  // Create a map of indexed resources for quick lookup
+  const indexedResourcesMap = new Map(
+    kbResources?.data?.map((r) => [r.resource_id, r.status]) || []
+  );
 
   if (isLoading) {
     return (
@@ -40,6 +53,7 @@ export function FileList({
           resource.inode_path.path.split("/").pop() || resource.inode_path.path;
         const isFolder = resource.inode_type === "directory";
         const isSelected = selectedResources.has(resource.resource_id);
+        const indexingStatus = indexedResourcesMap.get(resource.resource_id);
 
         return (
           <div
@@ -59,8 +73,8 @@ export function FileList({
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
               />
               <div
-                className="flex items-center space-x-2 cursor-pointer"
                 onClick={() => onResourceClick(resource)}
+                className="flex items-center space-x-2 cursor-pointer"
               >
                 {isFolder ? (
                   <Folder className="h-5 w-5 text-gray-500" />
@@ -70,6 +84,14 @@ export function FileList({
                 <p className="text-sm text-gray-900 truncate">{name}</p>
               </div>
             </div>
+            {indexingStatus && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">{indexingStatus}</span>
+                {indexingStatus === "indexed" && (
+                  <Check className="h-4 w-4 text-green-500" />
+                )}
+              </div>
+            )}
           </div>
         );
       })}

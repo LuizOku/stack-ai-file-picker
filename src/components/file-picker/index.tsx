@@ -124,6 +124,11 @@ export function FilePicker({ connections }: FilePickerProps) {
             resources={filteredResources}
             isLoading={isLoading}
             onResourceClick={handleResourceClick}
+            currentPath={
+              folderStack.length > 0
+                ? folderStack[folderStack.length - 1].path
+                : "/"
+            }
           />
         </main>
       </div>

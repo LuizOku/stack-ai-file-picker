@@ -1,7 +1,12 @@
 "use client";
 
-import { Menu, Home, Search } from "lucide-react";
+import { Menu, Home, Search, Database } from "lucide-react";
 import { useApp } from "@/stores/useApp";
+import { useCreateKnowledgeBase } from "@/services/hooks/useCreateKnowledgeBase";
+import { useSyncKnowledgeBase } from "@/services/hooks/useSyncKnowledgeBase";
+import { useOrganizationId } from "@/services/hooks/useOrganizationId";
+import { Button } from "@/components/button";
+import { useState } from "react";
 
 interface FolderInfo {
   id: string;
@@ -21,7 +26,18 @@ export function Header({
   folderStack,
   onMenuClick,
 }: HeaderProps) {
-  const { navigateBack, navigateToRoot } = useApp();
+  const {
+    navigateBack,
+    navigateToRoot,
+    selectedIntegration,
+    selectedResources,
+    setCurrentKnowledgeBaseId,
+    clearSelectedResources,
+  } = useApp();
+  const { data: orgId } = useOrganizationId();
+  const { trigger: createKnowledgeBase } = useCreateKnowledgeBase();
+  const { trigger: syncKnowledgeBase } = useSyncKnowledgeBase();
+  const [isIndexing, setIsIndexing] = useState(false);
 
   const handleFolderClick = (index: number) => {
     // If clicking on current folder, do nothing
@@ -31,6 +47,34 @@ export function Header({
     const stepsToGoBack = folderStack.length - 1 - index;
     for (let i = 0; i < stepsToGoBack; i++) {
       navigateBack();
+    }
+  };
+
+  const handleIndex = async () => {
+    if (!selectedIntegration || !orgId?.org_id || selectedResources.size === 0)
+      return;
+
+    try {
+      setIsIndexing(true);
+      const kb = await createKnowledgeBase({
+        connection_id: selectedIntegration,
+        connection_source_ids: Array.from(selectedResources),
+        name: "Luiz's Knowledge Base",
+        description: "Created from file picker",
+      });
+
+      if (kb) {
+        await syncKnowledgeBase({
+          knowledge_base_id: kb.knowledge_base_id,
+          org_id: orgId.org_id,
+        });
+        setCurrentKnowledgeBaseId(kb.knowledge_base_id);
+      }
+    } catch (error) {
+      console.error("Failed to create knowledge base:", error);
+    } finally {
+      setIsIndexing(false);
+      clearSelectedResources();
     }
   };
 
@@ -71,7 +115,7 @@ export function Header({
             ))}
           </div>
         </div>
-        <div className="w-full sm:w-auto sm:ml-auto">
+        <div className="w-full sm:w-auto sm:ml-auto flex items-center gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <input
@@ -82,6 +126,14 @@ export function Header({
               className="w-full sm:w-64 rounded-md border border-gray-300 pl-10 pr-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
+          <Button
+            onClick={handleIndex}
+            disabled={selectedResources.size === 0 || isIndexing}
+            className="flex items-center gap-2 bg-blue-500 text-white cursor-pointer"
+          >
+            <Database className="h-4 w-4" />
+            <span>Index Selected</span>
+          </Button>
         </div>
       </div>
     </div>
