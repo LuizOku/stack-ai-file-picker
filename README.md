@@ -4,7 +4,7 @@ A modern, responsive file picker component built with Next.js and TypeScript. Th
 
 ## Demo
 
-🚀 **[Live Demo](https://stack-ai-file-picker-g5fe36zxy-luizokus-projects.vercel.app/)**
+🚀 **[Live Demo](https://stack-ai-file-picker-nine.vercel.app/)**
 
 📹 **[Watch Demo Video](https://www.loom.com/share/b3814eaaa0b24e0ca3124b39931a948f?sid=fcf00a59-e486-4f1d-94f1-79edd75e21cb)**
 
